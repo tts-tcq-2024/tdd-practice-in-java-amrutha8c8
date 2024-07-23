@@ -1,4 +1,5 @@
 package TddPracticeInJava;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -6,13 +7,27 @@ import java.util.regex.Pattern;
 
 public class StringCalculator {
 
-    public int add(String input) throws Exception {
+    public int add(String input) {
         if (input.isEmpty()) {
             return 0;
         }
 
         String[] numbers = splitNumbers(input);
-        return calculateSum(numbers);
+        List<Integer> negativeNumbers = new ArrayList<>();
+        int sum = 0;
+
+        for (String number : numbers) {
+            int num = parseNumber(number, negativeNumbers);
+            if (num <= 1000) {
+                sum += num;
+            }
+        }
+
+        if (!negativeNumbers.isEmpty()) {
+            throw new IllegalArgumentException("Negatives not allowed: " + negativeNumbers);
+        }
+
+        return sum;
     }
 
     private String[] splitNumbers(String input) {
@@ -38,40 +53,15 @@ public class StringCalculator {
         }
     }
 
-    private int calculateSum(String[] numbers) throws Exception {
-        int sum = 0;
-        List<Integer> negatives = new ArrayList<>();
-        for (String number : numbers) {
-            processNumber(number, negatives, sum);
+    private int parseNumber(String number, List<Integer> negativeNumbers) {
+        if (number.isEmpty()) {
+            return 0;
         }
-        if (!negatives.isEmpty()) {
-            throw new Exception("Negatives not allowed: " + negatives);
-        }
-        return sum;
-    }
 
-    private void processNumber(String number, List<Integer> negatives, int sum) {
-        if (!number.isEmpty()) {
-            int num = Integer.parseInt(number);
-            if (num < 0) {
-                negatives.add(num);
-            } else if (num <= 1000) {
-                sum += num;
-            }
+        int num = Integer.parseInt(number);
+        if (num < 0) {
+            negativeNumbers.add(num);
         }
-    }
-
-    public static void main(String[] args) {
-        StringCalculator calculator = new StringCalculator();
-        try {
-            System.out.println(calculator.add("1\n2,3")); 
-            System.out.println(calculator.add("//;\n1;2")); 
-            System.out.println(calculator.add("//[***]\n1***2***3")); 
-            System.out.println(calculator.add("")); 
-            System.out.println(calculator.add("2,1001"));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        return num;
     }
 }
-
